@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>How We Improved Complaint Timeliness from 89% to 98% | FestOlive Analytics & AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="A practical case study on how FestOlive Analytics & AI improved complaint timeliness from 89% to 98% using dashboards, data pipelines, and process analytics." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #020617;
+      --bg-alt: #020617;
+      --card-bg: #020617;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.15);
+      --accent-strong: #0ea5e9;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --border-subtle: #1f2937;
+      --shadow-soft: 0 22px 45px rgba(15, 23, 42, 0.7);
+      --radius-lg: 18px;
+      --radius-xl: 26px;
+      --radius-pill: 999px;
+      --container-width: 1220px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #111827 0, #020617 55%, #020617 100%);
+      color: var(--text-main);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    .page {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.18), transparent 55%),
+        radial-gradient(circle at 100% 0%, rgba(52, 211, 153, 0.18), transparent 55%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .container {
+      width: 100%;
+      max-width: var(--container-width);
+      margin: 0 auto;
+      padding: 0 1.25rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Floating math symbols */
+
+    .math-symbol-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.45;
+    }
+
+    .floating-symbol {
+      position: absolute;
+      font-size: 2.4rem;
+      color: rgba(148, 163, 184, 0.16);
+      animation: floatSymbol 22s linear infinite;
+      text-shadow: 0 0 18px rgba(15, 23, 42, 0.9);
+    }
+
+    .floating-symbol:nth-child(1) { top: 15%; left: 8%; animation-duration: 24s; }
+    .floating-symbol:nth-child(2) { top: 30%; left: 82%; animation-duration: 19s; }
+    .floating-symbol:nth-child(3) { top: 65%; left: 12%; animation-duration: 27s; }
+    .floating-symbol:nth-child(4) { top: 78%; left: 55%; animation-duration: 21s; }
+    .floating-symbol:nth-child(5) { top: 18%; left: 48%; animation-duration: 29s; }
+
+    @keyframes floatSymbol {
+      0% { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 0; }
+      10% { opacity: 1; }
+      50% { transform: translate3d(18px, -45px, 0) rotate(8deg); }
+      90% { opacity: 1; }
+      100% { transform: translate3d(-10px, -80px, 0) rotate(-8deg); opacity: 0; }
+    }
+
+    /* Fade-in */
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* NAVBAR */
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(18px);
+      background: linear-gradient(
+        to bottom,
+        rgba(15, 23, 42, 0.95),
+        rgba(15, 23, 42, 0.78)
+      );
+      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+    }
+
+    .navbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.1rem 0;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .brand-logo img {
+      height: 60px;
+      width: auto;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-name {
+      font-weight: 600;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-tagline {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .nav-links a {
+      position: relative;
+      color: var(--text-muted);
+      padding-bottom: 0.1rem;
+      transition: color 0.18s ease;
+    }
+
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -0.18rem;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #38bdf8, #22c55e);
+      border-radius: 999px;
+      transition: width 0.2s ease-out;
+    }
+
+    .nav-links a:hover {
+      color: #e5e7eb;
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    .btn {
+      border: none;
+      border-radius: var(--radius-pill);
+      padding: 0.45rem 1.2rem;
+      font-size: 0.84rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+      transition: transform 0.08s ease-out, box-shadow 0.16s ease-out;
+    }
+
+    .btn-primary {
+      background: radial-gradient(circle at 10% 0, #38bdf8, #0ea5e9, #2563eb);
+      color: #e5f3ff;
+      box-shadow: 0 12px 28px rgba(59, 130, 246, 0.5);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 40px rgba(37, 99, 235, 0.65);
+    }
+
+    .btn-ghost {
+      border: 1px solid rgba(148, 163, 184, 0.52);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text-main);
+    }
+
+    .btn-ghost:hover {
+      border-color: rgba(148, 163, 184, 0.8);
+      background: rgba(15, 23, 42, 0.98);
+    }
+
+    .btn .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #bbf7d0;
+      box-shadow: 0 0 0 6px rgba(22, 163, 74, 0.18);
+    }
+
+    .burger {
+      display: none;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background: rgba(15, 23, 42, 0.9);
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .burger-lines {
+      width: 16px;
+      height: 11px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .burger-lines span {
+      width: 100%;
+      height: 1.5px;
+      border-radius: 999px;
+      background: #e5e7eb;
+    }
+
+    .mobile-nav {
+      display: none;
+      border-top: 1px solid rgba(15, 23, 42, 0.95);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.97), rgba(2, 6, 23, 0.98));
+    }
+
+    .mobile-nav.open {
+      display: block;
+    }
+
+    .mobile-nav-inner {
+      padding: 0.75rem 0 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .mobile-nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem 1.4rem;
+      font-size: 0.88rem;
+    }
+
+    .mobile-nav-links a {
+      color: var(--text-muted);
+    }
+
+    /* ARTICLE HERO */
+
+    .article-hero {
+      padding: 3.2rem 0 2.4rem;
+    }
+
+    .article-hero-inner {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
+      gap: 2rem;
+      align-items: center;
+    }
+
+    @media (max-width: 900px) {
+      .article-hero-inner {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .breadcrumb {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-bottom: 0.5rem;
+    }
+
+    .breadcrumb a {
+      color: #9ca3af;
+    }
+
+    .breadcrumb span {
+      opacity: 0.8;
+    }
+
+    .article-kicker {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #9ca3af;
+    }
+
+    .article-title {
+      font-size: clamp(2rem, 3vw, 2.5rem);
+      margin-top: 0.4rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .article-subtitle {
+      max-width: 38rem;
+      font-size: 0.96rem;
+      color: var(--text-muted);
+      margin-bottom: 1.2rem;
+    }
+
+    .article-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+
+    .article-meta span + span::before {
+      content: "•";
+      margin: 0 0.4rem;
+      opacity: 0.7;
+    }
+
+    .hero-metric-block {
+      padding: 1rem 1.1rem;
+      border-radius: 1.2rem;
+      background: rgba(15, 23, 42, 0.97);
+      border: 1px solid rgba(55, 65, 81, 0.95);
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.8);
+      font-size: 0.86rem;
+    }
+
+    .hero-metric-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .hero-metric-chip {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: rgba(15, 23, 42, 1);
+      color: #cbd5f5;
+    }
+
+    .hero-metric-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 0.4rem;
+    }
+
+    .hero-metric-item {
+      min-width: 120px;
+    }
+
+    .hero-metric-label {
+      font-size: 0.78rem;
+      color: #9ca3af;
+    }
+
+    .hero-metric-value {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .hero-metric-note {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    /* ARTICLE BODY */
+
+    .article-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2.4fr) minmax(0, 1.2fr);
+      gap: 2rem;
+      padding-bottom: 3rem;
+    }
+
+    @media (max-width: 900px) {
+      .article-layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    article {
+      font-size: 0.93rem;
+      color: var(--text-muted);
+    }
+
+    article h2 {
+      font-size: 1.1rem;
+      margin: 1.6rem 0 0.4rem;
+      color: #e5e7eb;
+    }
+
+    article h3 {
+      font-size: 0.98rem;
+      margin: 1.2rem 0 0.35rem;
+      color: #e5e7eb;
+    }
+
+    article p {
+      margin-bottom: 0.8rem;
+    }
+
+    article ul {
+      margin: 0.3rem 0 0.8rem 1.1rem;
+      padding-left: 0.4rem;
+    }
+
+    article li {
+      margin-bottom: 0.35rem;
+    }
+
+    .inline-highlight {
+      border-left: 2px solid rgba(56, 189, 248, 0.75);
+      padding-left: 0.7rem;
+      margin: 1rem 0;
+      color: #e5e7eb;
+      font-size: 0.88rem;
+    }
+
+    .step-list {
+      list-style: none;
+      margin: 0.3rem 0 0.8rem 0;
+      padding-left: 0;
+    }
+
+    .step-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.7rem;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+
+    .step-number {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.17);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      font-weight: 500;
+    }
+
+    .step-title {
+      font-size: 0.9rem;
+      color: #e5e7eb;
+      margin-bottom: 0.15rem;
+    }
+
+    .step-body {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+    }
+
+    .callout {
+      margin-top: 1.2rem;
+      padding: 0.9rem 1rem;
+      border-radius: 1rem;
+      background: rgba(22, 163, 74, 0.12);
+      border: 1px solid rgba(74, 222, 128, 0.4);
+      font-size: 0.85rem;
+      color: #bbf7d0;
+    }
+
+    /* SIDEBAR */
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      font-size: 0.85rem;
+    }
+
+    .sidebar-card {
+      padding: 1rem 1.1rem;
+      border-radius: 1.2rem;
+      background: rgba(15, 23, 42, 0.97);
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      box-shadow: 0 14px 32px rgba(15, 23, 42, 0.8);
+    }
+
+    .sidebar-card h3 {
+      font-size: 0.95rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .sidebar-card p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .metric-bullets {
+      list-style: none;
+      margin: 0.35rem 0 0.2rem 0;
+      padding-left: 0;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .metric-bullets li {
+      margin-bottom: 0.25rem;
+    }
+
+    .sidebar-cta {
+      margin-top: 0.7rem;
+    }
+
+    .sidebar-links {
+      margin-top: 0.35rem;
+      list-style: none;
+      padding-left: 0;
+      font-size: 0.8rem;
+    }
+
+    .sidebar-links li {
+      margin-bottom: 0.25rem;
+    }
+
+    .sidebar-links a {
+      color: #e5e7eb;
+    }
+
+    .sidebar-links a:hover {
+      color: #bae6fd;
+    }
+
+    /* FOOTER */
+
+    footer {
+      border-top: 1px solid rgba(31, 41, 55, 0.9);
+      padding: 1rem 0 1.3rem;
+      font-size: 0.78rem;
+      color: #6b7280;
+      background: rgba(15, 23, 42, 0.98);
+      margin-top: 2rem;
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: #9ca3af;
+    }
+
+    .footer-links a:hover {
+      color: #e5e7eb;
+    }
+
+    /* Responsive tweaks */
+
+    @media (max-width: 780px) {
+      .nav-links {
+        display: none;
+      }
+
+      .burger {
+        display: inline-flex;
+      }
+
+      .article-hero {
+        padding-top: 2.4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- Floating math symbols -->
+    <div class="math-symbol-layer">
+      <span class="floating-symbol">Σ</span>
+      <span class="floating-symbol">ρ</span>
+      <span class="floating-symbol">∑</span>
+      <span class="floating-symbol">π</span>
+      <span class="floating-symbol">101</span>
+    </div>
+
+    <!-- NAVBAR -->
+    <header class="navbar">
+      <div class="container">
+        <div class="navbar-inner">
+          <div class="brand">
+            <div class="brand-logo">
+              <img src="logo.JPG" alt="FestOlive Logo">
+            </div>
+            <div class="brand-text">
+              <div class="brand-name">FestOlive Analytics &amp; AI</div>
+              <div class="brand-tagline">Analytics • Forecasting • Strategy</div>
+            </div>
+          </div>
+
+          <nav class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="index.html#services">Services</a>
+            <a href="resources.html">Resources</a>
+            <a href="index.html#contact">Contact</a>
+          </nav>
+
+          <button class="burger" type="button" aria-label="Toggle navigation" data-nav-toggle>
+            <div class="burger-lines">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </button>
+        </div>
+
+        <div class="mobile-nav" data-nav-menu>
+          <div class="mobile-nav-inner">
+            <div class="mobile-nav-links">
+              <a href="index.html">Home</a>
+              <a href="index.html#services">Services</a>
+              <a href="resources.html">Resources</a>
+              <a href="index.html#contact">Contact</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ARTICLE HERO -->
+    <section class="article-hero">
+      <div class="container">
+        <div class="article-hero-inner fade-in">
+          <div>
+            <div class="breadcrumb">
+              <a href="index.html">Home</a> <span> / </span>
+              <a href="resources.html">Resources</a> <span> / Case study</span>
+            </div>
+            <div class="article-kicker">Case study • Complaint analytics</div>
+            <h1 class="article-title">
+              How we improved complaint timeliness from 89% to 98%
+            </h1>
+            <p class="article-subtitle">
+              A practical look at how better metrics, focused dashboards, and data-driven
+              process changes helped a global organization reduce late complaints and
+              improve oversight.
+            </p>
+            <div class="article-meta">
+              <span>Use case: Pharma / Healthcare complaints</span>
+              <span>Focus: Timeliness, dashboards, process analytics</span>
+            </div>
+          </div>
+
+          <aside class="hero-metric-block">
+            <div class="hero-metric-header">
+              <div>Before &amp; after snapshot</div>
+              <span class="hero-metric-chip">Key outcomes</span>
+            </div>
+            <div class="hero-metric-row">
+              <div class="hero-metric-item">
+                <div class="hero-metric-label">On-time complaints</div>
+                <div class="hero-metric-value">89% → 98%</div>
+              </div>
+              <div class="hero-metric-item">
+                <div class="hero-metric-label">Late volume</div>
+                <div class="hero-metric-value">-60%+</div>
+              </div>
+              <div class="hero-metric-item">
+                <div class="hero-metric-label">Exec visibility</div>
+                <div class="hero-metric-value">Dashboard-driven</div>
+              </div>
+            </div>
+            <p class="hero-metric-note">
+              All figures are illustrative but reflect the scale of improvement
+              typical when complaint timeliness is measured correctly and acted on
+              consistently.
+            </p>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- ARTICLE BODY -->
+    <main>
+      <div class="container">
+        <div class="article-layout">
+          <!-- Main article -->
+          <article class="fade-in">
+            <h2>The starting point: many reports, no single story</h2>
+            <p>
+              When we first engaged with this complaint team, timeliness was already
+              being tracked — but in different spreadsheets, regional reports, and
+              ad-hoc PowerPoints. Leaders saw numbers like <strong>“89% on-time”</strong>,
+              but no one could easily answer:
+            </p>
+            <ul>
+              <li>Which complaints are actually late right now?</li>
+              <li>Where are we losing time in the process (triage, investigation, closure)?</li>
+              <li>Which products, regions, or owner groups drive most lateness?</li>
+            </ul>
+            <p>
+              The result: firefighting, delayed escalations, and regular surprises
+              close to compliance deadlines.
+            </p>
+
+            <div class="inline-highlight">
+              Our goal wasn’t just to “improve the percentage.” It was to
+              <strong>make lateness visible early</strong>, at the right level
+              (global, regional, owner group), so teams could intervene before
+              deadlines were missed.
+            </div>
+
+            <h2>Step 1 – Define a clear timeliness logic everyone trusts</h2>
+            <p>
+              The first step was to agree on a <strong>single, simple definition</strong>
+              of complaint timeliness that could be applied consistently across regions.
+            </p>
+
+            <h3>Key decisions we aligned with stakeholders</h3>
+            <ul>
+              <li>
+                <strong>Clock start:</strong> Which date determines when the “timer”
+                begins (e.g., awareness date vs. system entry date).
+              </li>
+              <li>
+                <strong>On-time vs late rule:</strong> For example, complaints closed
+                within <strong>≤ 45 days</strong> counted as on-time; anything above
+                that threshold was late.
+              </li>
+              <li>
+                <strong>Scope of analysis:</strong> Exclude test cases, withdrawn
+                complaints, or specific “no action” categories so the metric focused
+                on meaningful workload.
+              </li>
+            </ul>
+
+            <p>
+              We then translated this logic into a set of <strong>repeatable
+              calculations</strong> using SQL and/or Python so that every dashboard
+              would always show the same view of timeliness — no matter who pulled
+              the report.
+            </p>
+
+            <h2>Step 2 – Build a dynamic view of on-time vs late</h2>
+            <p>
+              With the metric defined, the next move was to build a
+              <strong>visual layer</strong> that made performance obvious at a glance.
+            </p>
+
+            <h3>Core design patterns we used</h3>
+            <ul>
+              <li>
+                A <strong>global doughnut chart</strong> showing on-time vs late
+                rates with color thresholds (green, yellow, red) based on target
+                levels (e.g., 98%).
+              </li>
+              <li>
+                <strong>Regional breakdowns</strong> so leaders could see which
+                areas were pulling the overall metric up or down.
+              </li>
+              <li>
+                <strong>Drill-down by owner group</strong> and product, so teams
+                could identify where lateness was concentrated.
+              </li>
+            </ul>
+
+            <p>
+              Instead of scrolling through rows in Excel, managers could immediately
+              answer: <em>“Where are we late, and who needs help?”</em>
+            </p>
+
+            <h2>Step 3 – Add process analytics: where is time being lost?</h2>
+            <p>
+              Improving the percentage required more than just measuring it.
+              We needed to see <strong>where time was leaking</strong> within the
+              complaint lifecycle.
+            </p>
+
+            <ul class="step-list">
+              <li class="step-item">
+                <div class="step-number">1</div>
+                <div>
+                  <div class="step-title">Stage-level timing</div>
+                  <div class="step-body">
+                    We calculated days spent in key stages (e.g., triage,
+                    investigation, closure) for each complaint, using process step
+                    start/end dates.
+                  </div>
+                </div>
+              </li>
+              <li class="step-item">
+                <div class="step-number">2</div>
+                <div>
+                  <div class="step-title">Thresholds by risk level</div>
+                  <div class="step-body">
+                    Higher-risk cases (serious events, priority products) were given
+                    tighter internal thresholds so they appeared earlier on the radar.
+                  </div>
+                </div>
+              </li>
+              <li class="step-item">
+                <div class="step-number">3</div>
+                <div>
+                  <div class="step-title">Exception-focused views</div>
+                  <div class="step-body">
+                    We built views focused only on cases approaching or exceeding
+                    the threshold so reviewers didn’t have to scan thousands of records.
+                  </div>
+                </div>
+              </li>
+            </ul>
+
+            <div class="callout">
+              Once everyone could see <strong>“where the days were going,”</strong>
+              conversations shifted from blaming individuals to adjusting workloads,
+              redistributing cases, and refining triage rules.
+            </div>
+
+            <h2>Step 4 – Operationalize: alerts, routines, and ownership</h2>
+            <p>
+              A dashboard alone doesn’t move metrics. The improvement from
+              <strong>89% to 98%</strong> came when we paired analytics with
+              <strong>clear routines and ownership</strong>.
+            </p>
+
+            <h3>What changed in day-to-day work</h3>
+            <ul>
+              <li>
+                <strong>Weekly timeliness review:</strong> Each region had a short,
+                focused review using the same dashboard, highlighting late and at-risk
+                cases.
+              </li>
+              <li>
+                <strong>Owner-group accountability:</strong> Late cases were grouped
+                by owner team, making bottlenecks visible and solvable.
+              </li>
+              <li>
+                <strong>Early-warning alerts:</strong> Optional alerts (e.g., email,
+                Teams) for cases hitting internal “warning” thresholds.
+              </li>
+            </ul>
+
+            <p>
+              Over a few months, teams became proactive — instead of discovering late
+              cases at the end of the month, they were addressed days or weeks earlier.
+            </p>
+
+            <h2>Step 5 – Iterate, refine, and scale</h2>
+            <p>
+              As timeliness improved, leaders wanted to extend the approach to:
+            </p>
+            <ul>
+              <li>Specific product families and priority markets.</li>
+              <li>Complaint types (e.g., safety vs. non-safety issues).</li>
+              <li>Additional metrics like aging backlog and aging open cases.</li>
+            </ul>
+
+            <p>
+              Because the underlying data model and definitions were already set,
+              scaling the analytics to these new questions became much faster —
+              often a matter of extending filters, segments, or visual slices.
+            </p>
+
+            <h2>What this means for your organization</h2>
+            <p>
+              Improving timeliness isn’t magic — but it does require clarity
+              across data, metrics, and process. The key ingredients in this
+              case were:
+            </p>
+            <ul>
+              <li>A <strong>trusted definition</strong> of “on-time” vs “late.”</li>
+              <li>Dashboards built around <strong>exceptions and action</strong>, not just charts.</li>
+              <li><strong>Stage-level analytics</strong> to see where the time is lost.</li>
+              <li>Simple, repeatable <strong>review routines</strong> that teams actually use.</li>
+            </ul>
+
+            <p>
+              If you’re currently seeing numbers like “89% on-time” and want to
+              move closer to “98%” — the starting point is often the same:
+              <strong>audit your definitions, centralize the data, and build one
+              clear view</strong> that your teams can rally around.
+            </p>
+
+            <div class="inline-highlight">
+              Want to explore what this could look like for your own complaint or
+              operations data? A short discovery call is usually enough to outline
+              a custom roadmap.
+            </div>
+
+            <p>
+              <a href="index.html#contact" class="btn btn-primary">
+                <span class="dot"></span>
+                Talk about complaint timeliness
+              </a>
+            </p>
+          </article>
+
+          <!-- Sidebar -->
+          <aside class="sidebar fade-in">
+            <div class="sidebar-card">
+              <h3>Quick summary</h3>
+              <ul class="metric-bullets">
+                <li><strong>Context:</strong> Global pharma / healthcare complaints.</li>
+                <li><strong>Main metric:</strong> Complaint closure within 45 days.</li>
+                <li><strong>Impact:</strong> 89% → 98% on-time; sustained over several months.</li>
+              </ul>
+              <p>
+                The biggest shift was not a new tool — it was a combination of
+                <strong>clear logic, focused dashboards, and repeatable routines</strong>.
+              </p>
+            </div>
+
+            <div class="sidebar-card">
+              <h3>Patterns you can reuse</h3>
+              <ul class="sidebar-links">
+                <li>▶ A single timeliness definition shared across all regions.</li>
+                <li>▶ Exception-focused views (late and at-risk only).</li>
+                <li>▶ Stage-by-stage timing (triage, investigation, closure).</li>
+                <li>▶ Weekly reviews anchored on one “source of truth” dashboard.</li>
+              </ul>
+            </div>
+
+            <div class="sidebar-card">
+              <h3>Related resources</h3>
+              <ul class="sidebar-links">
+                <li><a href="resources.html">Designing complaint dashboards executives actually use</a></li>
+                <li><a href="resources.html">Monthly complaint volume forecasting checklist</a></li>
+                <li><a href="resources.html">From spreadsheets to a centralized data layer</a></li>
+              </ul>
+            </div>
+
+            <div class="sidebar-card">
+              <h3>Talk to us about your metrics</h3>
+              <p>
+                Whether you’re in pharma, healthcare, or another regulated space,
+                we can help you move from scattered reports to a single, reliable
+                view of performance.
+              </p>
+              <div class="sidebar-cta">
+                <a href="index.html#contact" class="btn btn-ghost">
+                  <span class="dot"></span>
+                  Request a 30-minute consult
+                </a>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="container">
+        <div class="footer-inner">
+          <div>© <span id="year"></span> FestOlive Analytics &amp; AI. All rights reserved.</div>
+          <div class="footer-links">
+            <a href="index.html">Back to home</a>
+            <a href="resources.html">Resources</a>
+            <a href="index.html#contact">Contact</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Year
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // Mobile nav toggle
+    const navToggle = document.querySelector("[data-nav-toggle]");
+    const navMenu = document.querySelector("[data-nav-menu]");
+
+    if (navToggle && navMenu) {
+      navToggle.addEventListener("click", () => {
+        navMenu.classList.toggle("open");
+      });
+    }
+
+    // Fade-in on scroll
+    const fadeEls = document.querySelectorAll(".fade-in");
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("visible");
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.15 }
+      );
+      fadeEls.forEach((el) => observer.observe(el));
+    } else {
+      fadeEls.forEach((el) => el.classList.add("visible"));
+    }
+  </script>
+</body>
+</html>

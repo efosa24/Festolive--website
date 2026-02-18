@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Resources | FestOlive Analytics & AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Articles, resources, and practical guides from FestOlive Analytics & AI on dashboards, forecasting, and data strategy." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #020617;
+      --bg-alt: #020617;
+      --card-bg: #020617;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.15);
+      --accent-strong: #0ea5e9;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --border-subtle: #1f2937;
+      --shadow-soft: 0 22px 45px rgba(15, 23, 42, 0.7);
+      --radius-lg: 18px;
+      --radius-xl: 26px;
+      --radius-pill: 999px;
+      --container-width: 1220px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #111827 0, #020617 55%, #020617 100%);
+      color: var(--text-main);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    .page {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.18), transparent 55%),
+        radial-gradient(circle at 100% 0%, rgba(52, 211, 153, 0.18), transparent 55%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .container {
+      width: 100%;
+      max-width: var(--container-width);
+      margin: 0 auto;
+      padding: 0 1.25rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Floating math symbols (same vibe as main site) */
+
+    .math-symbol-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.5;
+    }
+
+    .floating-symbol {
+      position: absolute;
+      font-size: 2.4rem;
+      color: rgba(148, 163, 184, 0.16);
+      animation: floatSymbol 20s linear infinite;
+      text-shadow: 0 0 18px rgba(15, 23, 42, 0.9);
+    }
+
+    .floating-symbol:nth-child(1) { top: 12%; left: 10%; animation-duration: 24s; }
+    .floating-symbol:nth-child(2) { top: 35%; left: 80%; animation-duration: 19s; }
+    .floating-symbol:nth-child(3) { top: 65%; left: 18%; animation-duration: 26s; }
+    .floating-symbol:nth-child(4) { top: 78%; left: 55%; animation-duration: 21s; }
+    .floating-symbol:nth-child(5) { top: 22%; left: 48%; animation-duration: 28s; }
+
+    @keyframes floatSymbol {
+      0% {
+        transform: translate3d(0, 0, 0) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      50% {
+        transform: translate3d(20px, -40px, 0) rotate(10deg);
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translate3d(-10px, -80px, 0) rotate(-8deg);
+        opacity: 0;
+      }
+    }
+
+    /* Fade-in */
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* NAVBAR (simplified but consistent) */
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(18px);
+      background: linear-gradient(
+        to bottom,
+        rgba(15, 23, 42, 0.95),
+        rgba(15, 23, 42, 0.78)
+      );
+      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+    }
+
+    .navbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.1rem 0;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .brand-logo img {
+      height: 60px;
+      width: auto;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-name {
+      font-weight: 600;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-tagline {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .nav-links a {
+      position: relative;
+      color: var(--text-muted);
+      padding-bottom: 0.1rem;
+      transition: color 0.18s ease;
+    }
+
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -0.18rem;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #38bdf8, #22c55e);
+      border-radius: 999px;
+      transition: width 0.2s ease-out;
+    }
+
+    .nav-links a:hover {
+      color: #e5e7eb;
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    .btn {
+      border: none;
+      border-radius: var(--radius-pill);
+      padding: 0.45rem 1.2rem;
+      font-size: 0.84rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+      transition: transform 0.08s ease-out, box-shadow 0.16s ease-out;
+    }
+
+    .btn-primary {
+      background: radial-gradient(circle at 10% 0, #38bdf8, #0ea5e9, #2563eb);
+      color: #e5f3ff;
+      box-shadow: 0 12px 28px rgba(59, 130, 246, 0.5);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 40px rgba(37, 99, 235, 0.65);
+    }
+
+    .btn-ghost {
+      border: 1px solid rgba(148, 163, 184, 0.52);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text-main);
+    }
+
+    .btn-ghost:hover {
+      border-color: rgba(148, 163, 184, 0.8);
+      background: rgba(15, 23, 42, 0.98);
+    }
+
+    .btn .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #bbf7d0;
+      box-shadow: 0 0 0 6px rgba(22, 163, 74, 0.18);
+    }
+
+    .burger {
+      display: none;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background: rgba(15, 23, 42, 0.9);
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .burger-lines {
+      width: 16px;
+      height: 11px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .burger-lines span {
+      width: 100%;
+      height: 1.5px;
+      border-radius: 999px;
+      background: #e5e7eb;
+    }
+
+    .mobile-nav {
+      display: none;
+      border-top: 1px solid rgba(15, 23, 42, 0.95);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.97), rgba(2, 6, 23, 0.98));
+    }
+
+    .mobile-nav.open {
+      display: block;
+    }
+
+    .mobile-nav-inner {
+      padding: 0.75rem 0 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .mobile-nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem 1.4rem;
+      font-size: 0.88rem;
+    }
+
+    .mobile-nav-links a {
+      color: var(--text-muted);
+    }
+
+    /* HERO / HEADER */
+
+    .page-hero {
+      padding: 3.2rem 0 2.4rem;
+    }
+
+    .page-hero-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .breadcrumb {
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+
+    .breadcrumb a {
+      color: #9ca3af;
+    }
+
+    .breadcrumb span {
+      opacity: 0.8;
+    }
+
+    .page-kicker {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #9ca3af;
+    }
+
+    .page-title {
+      font-size: clamp(1.9rem, 3vw, 2.3rem);
+      margin-top: 0.4rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+      max-width: 40rem;
+      font-size: 0.96rem;
+      color: var(--text-muted);
+    }
+
+    .page-controls {
+      margin-top: 1.2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      align-items: center;
+    }
+
+    .filter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
+    .filter-chip {
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: rgba(15, 23, 42, 0.96);
+      font-size: 0.78rem;
+      color: #e5e7eb;
+      cursor: pointer;
+    }
+
+    .filter-chip.active {
+      border-color: rgba(56, 189, 248, 0.85);
+      background: rgba(15, 23, 42, 1);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35);
+    }
+
+    .search-wrapper {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: rgba(15, 23, 42, 0.96);
+      font-size: 0.8rem;
+      color: #9ca3af;
+      max-width: 260px;
+      width: 100%;
+    }
+
+    .search-wrapper input {
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--text-main);
+      font-size: 0.8rem;
+      width: 100%;
+    }
+
+    .search-wrapper input::placeholder {
+      color: #6b7280;
+    }
+
+    /* MAIN GRID */
+
+    main {
+      padding-bottom: 3rem;
+    }
+
+    .layout-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 2.4fr) minmax(0, 1.3fr);
+      gap: 2rem;
+    }
+
+    .resource-list {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.2rem;
+    }
+
+    .resource-card {
+      padding: 1rem 1.1rem;
+      border-radius: 1.2rem;
+      background: rgba(15, 23, 42, 0.97);
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.75);
+      font-size: 0.86rem;
+    }
+
+    .resource-headline-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .resource-kicker {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #9ca3af;
+    }
+
+    .resource-badge {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: rgba(15, 23, 42, 1);
+      color: #cbd5f5;
+      white-space: nowrap;
+    }
+
+    .resource-title {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+
+    .resource-meta {
+      font-size: 0.76rem;
+      color: #9ca3af;
+      margin-bottom: 0.5rem;
+    }
+
+    .resource-meta span + span::before {
+      content: "•";
+      margin: 0 0.35rem;
+      opacity: 0.7;
+    }
+
+    .resource-body {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .resource-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.4rem;
+    }
+
+    .resource-tag {
+      font-size: 0.7rem;
+      padding: 0.18rem 0.5rem;
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      color: #cbd5f5;
+    }
+
+    .resource-link {
+      margin-top: 0.4rem;
+      font-size: 0.8rem;
+      color: #bae6fd;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    /* SIDEBAR */
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    .sidebar-card {
+      padding: 1rem 1.1rem;
+      border-radius: 1.2rem;
+      background: rgba(15, 23, 42, 0.97);
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      font-size: 0.84rem;
+    }
+
+    .sidebar-card h3 {
+      font-size: 0.92rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .sidebar-card p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .mini-list {
+      list-style: none;
+      margin-top: 0.4rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .mini-list li {
+      margin-bottom: 0.25rem;
+    }
+
+    .mini-list li a {
+      color: #e5e7eb;
+    }
+
+    .mini-list li a:hover {
+      color: #bae6fd;
+    }
+
+    .newsletter-form {
+      margin-top: 0.7rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .newsletter-form input {
+      width: 100%;
+      font-family: inherit;
+      font-size: 0.8rem;
+      padding: 0.45rem 0.55rem;
+      border-radius: 0.8rem;
+      border: 1px solid rgba(55, 65, 81, 0.95);
+      background: rgba(15, 23, 42, 0.98);
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .newsletter-form input::placeholder {
+      color: #6b7280;
+    }
+
+    .newsletter-note {
+      font-size: 0.74rem;
+      color: #6b7280;
+      margin-top: 0.2rem;
+    }
+
+    /* FOOTER */
+
+    footer {
+      border-top: 1px solid rgba(31, 41, 55, 0.9);
+      padding: 1rem 0 1.3rem;
+      font-size: 0.78rem;
+      color: #6b7280;
+      background: rgba(15, 23, 42, 0.98);
+      margin-top: 2rem;
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: #9ca3af;
+    }
+
+    .footer-links a:hover {
+      color: #e5e7eb;
+    }
+
+    /* Responsive */
+
+    @media (max-width: 900px) {
+      .layout-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .search-wrapper {
+        margin-left: 0;
+      }
+    }
+
+    @media (max-width: 780px) {
+      .nav-links {
+        display: none;
+      }
+
+      .burger {
+        display: inline-flex;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .page-hero {
+        padding-top: 2.4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- Floating math symbols -->
+    <div class="math-symbol-layer">
+      <span class="floating-symbol">Σ</span>
+      <span class="floating-symbol">ρ</span>
+      <span class="floating-symbol">∑</span>
+      <span class="floating-symbol">π</span>
+      <span class="floating-symbol">101</span>
+    </div>
+
+    <!-- NAVBAR -->
+    <header class="navbar">
+      <div class="container">
+        <div class="navbar-inner">
+          <div class="brand">
+            <div class="brand-logo">
+              <img src="logo.JPG" alt="FestOlive Logo">
+            </div>
+            <div class="brand-text">
+              <div class="brand-name">FestOlive Analytics &amp; AI</div>
+              <div class="brand-tagline">Analytics • Forecasting • Strategy</div>
+            </div>
+          </div>
+
+          <nav class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="index.html#services">Services</a>
+            <a href="index.html#mission">Mission</a>
+            <a href="resources.html">Resources</a>
+            <a href="index.html#contact">Contact</a>
+          </nav>
+
+          <button class="burger" type="button" aria-label="Toggle navigation" data-nav-toggle>
+            <div class="burger-lines">
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </button>
+        </div>
+
+        <div class="mobile-nav" data-nav-menu>
+          <div class="mobile-nav-inner">
+            <div class="mobile-nav-links">
+              <a href="index.html">Home</a>
+              <a href="index.html#services">Services</a>
+              <a href="index.html#mission">Mission</a>
+              <a href="resources.html">Resources</a>
+              <a href="index.html#contact">Contact</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- PAGE HERO -->
+    <section class="page-hero">
+      <div class="container">
+        <div class="page-hero-inner fade-in">
+          <div class="breadcrumb">
+            <a href="index.html">Home</a> <span> / Resources</span>
+          </div>
+          <div class="page-kicker">Resources &amp; insights</div>
+          <h1 class="page-title">Guides, dashboards, and analytics playbooks.</h1>
+          <p class="page-subtitle">
+            A growing library of practical content for leaders, analysts, and teams
+            who want to make better decisions with data — without getting lost in theory.
+          </p>
+
+          <div class="page-controls">
+            <div class="filter-chips">
+              <button class="filter-chip active" data-filter="all">All</button>
+              <button class="filter-chip" data-filter="dashboard">Dashboards</button>
+              <button class="filter-chip" data-filter="forecasting">Forecasting</button>
+              <button class="filter-chip" data-filter="strategy">Data strategy</button>
+            </div>
+
+            <div class="search-wrapper">
+              <span>🔍</span>
+              <input id="search" type="text" placeholder="Search resources (coming soon)" disabled />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAIN CONTENT -->
+    <main>
+      <div class="container">
+        <div class="layout-grid">
+          <!-- Resource list -->
+          <div class="resource-list">
+            <!-- Example 1 -->
+            <article class="resource-card fade-in" data-category="dashboard">
+              <div class="resource-headline-row">
+                <div>
+                  <div class="resource-kicker">Practical guide</div>
+                  <h2 class="resource-title">
+                    Designing complaint dashboards executives actually use
+                  </h2>
+                </div>
+                <span class="resource-badge">Dashboards</span>
+              </div>
+              <div class="resource-meta">
+                <span>Estimated read: 8 min</span>
+                <span>Format: Article</span>
+              </div>
+              <p class="resource-body">
+                A step-by-step framework for turning raw complaint data into a
+                simple, trustable view of on-time performance, risk areas, and
+                owner accountability.
+              </p>
+              <div class="resource-tags">
+                <span class="resource-tag">Complaint analytics</span>
+                <span class="resource-tag">Tableau</span>
+                <span class="resource-tag">KPI design</span>
+              </div>
+              <a href="Complaint Timeliness.html" class="resource-link">
+                Read the full case study <span>→</span>
+                </a>
+
+              </a>
+            </article>
+
+            <!-- Example 2 -->
+            <article class="resource-card fade-in" data-category="forecasting">
+              <div class="resource-headline-row">
+                <div>
+                  <div class="resource-kicker">Template</div>
+                  <h2 class="resource-title">
+                    Monthly complaint volume forecasting checklist
+                  </h2>
+                </div>
+                <span class="resource-badge">Forecasting</span>
+              </div>
+              <div class="resource-meta">
+                <span>Downloadable</span>
+                <span>Format: Checklist / PDF</span>
+              </div>
+              <p class="resource-body">
+                A structured checklist you can apply to any product or region:
+                from cleaning time series data to choosing models (Prophet, ARIMA)
+                and validating results with business teams.
+              </p>
+              <div class="resource-tags">
+                <span class="resource-tag">Time series</span>
+                <span class="resource-tag">Python</span>
+                <span class="resource-tag">Capacity planning</span>
+              </div>
+              <a href="#" class="resource-link">
+                Coming soon <span>→</span>
+              </a>
+            </article>
+
+            <!-- Example 3 -->
+            <article class="resource-card fade-in" data-category="strategy">
+              <div class="resource-headline-row">
+                <div>
+                  <div class="resource-kicker">Playbook</div>
+                  <h2 class="resource-title">
+                    From spreadsheets to a centralized data layer in 90 days
+                  </h2>
+                </div>
+                <span class="resource-badge">Data strategy</span>
+              </div>
+              <div class="resource-meta">
+                <span>Estimated read: 10 min</span>
+                <span>Format: Playbook</span>
+              </div>
+              <p class="resource-body">
+                How to move from ad-hoc Excel reports to a simple, maintainable
+                warehouse and semantic layer — without over-engineering for a
+                small or mid-sized team.
+              </p>
+              <div class="resource-tags">
+                <span class="resource-tag">Data modeling</span>
+                <span class="resource-tag">Warehousing</span>
+                <span class="resource-tag">Governance</span>
+              </div>
+              <a href="#" class="resource-link">
+                Coming soon <span>→</span>
+              </a>
+            </article>
+
+            <!-- Example 4 -->
+            <article class="resource-card fade-in" data-category="dashboard">
+              <div class="resource-headline-row">
+                <div>
+                  <div class="resource-kicker">How-to</div>
+                  <h2 class="resource-title">
+                    Building dynamic timeliness doughnut charts in Tableau
+                  </h2>
+                </div>
+                <span class="resource-badge">Dashboards</span>
+              </div>
+              <div class="resource-meta">
+                <span>Estimated read: 6 min</span>
+                <span>Format: Tutorial</span>
+              </div>
+              <p class="resource-body">
+                A walkthrough of the logic, calculations, and design patterns used
+                to show complaint timeliness with color thresholds and drill-downs
+                by region and owner group.
+              </p>
+              <div class="resource-tags">
+                <span class="resource-tag">Tableau</span>
+                <span class="resource-tag">Visual design</span>
+                <span class="resource-tag">Quality metrics</span>
+              </div>
+              <a href="#" class="resource-link">
+                Coming soon <span>→</span>
+              </a>
+            </article>
+          </div>
+
+          <!-- Sidebar -->
+          <aside class="sidebar">
+            <div class="sidebar-card fade-in">
+              <h3>Start with these when live</h3>
+              <p>
+                Once content is published, you can highlight your top 3–5 resources here
+                for new visitors.
+              </p>
+              <ul class="mini-list">
+                <li><a href="#">Building your first executive dashboard</a></li>
+                <li><a href="#">Choosing metrics for complaint timeliness</a></li>
+                <li><a href="#">Forecasting volumes by product &amp; region</a></li>
+              </ul>
+            </div>
+
+            <div class="sidebar-card fade-in">
+              <h3>Subscribe for new content</h3>
+              <p>
+                Get notified when new guides, templates, and dashboard patterns go live.
+              </p>
+              <form class="newsletter-form">
+                <input type="email" placeholder="Work email (coming soon)" disabled />
+                <button type="button" class="btn btn-primary" disabled>
+                  <span class="dot"></span>
+                  Join waitlist
+                </button>
+                <div class="newsletter-note">
+                  Newsletter sign-up can be wired later (Mailchimp, ConvertKit, etc.).
+                </div>
+              </form>
+            </div>
+
+            <div class="sidebar-card fade-in">
+              <h3>Looking for something specific?</h3>
+              <p>
+                Want a guide on a particular topic — for example,
+                <em>triage timeliness</em> or <em>AI in complaint analytics</em>?
+                Mention it when you contact us.
+              </p>
+              <a href="index.html#contact" class="resource-link">
+                Go to contact form <span>→</span>
+              </a>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="container">
+        <div class="footer-inner">
+          <div>© <span id="year"></span> FestOlive Analytics &amp; AI. All rights reserved.</div>
+          <div class="footer-links">
+            <a href="index.html">Back to home</a>
+            <a href="index.html#services">Services</a>
+            <a href="index.html#contact">Contact</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Year
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // Mobile nav toggle
+    const navToggle = document.querySelector("[data-nav-toggle]");
+    const navMenu = document.querySelector("[data-nav-menu]");
+
+    if (navToggle && navMenu) {
+      navToggle.addEventListener("click", () => {
+        navMenu.classList.toggle("open");
+      });
+    }
+
+    // Fade-in on scroll
+    const fadeEls = document.querySelectorAll(".fade-in");
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("visible");
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.15 }
+      );
+      fadeEls.forEach((el) => observer.observe(el));
+    } else {
+      fadeEls.forEach((el) => el.classList.add("visible"));
+    }
+
+    // Simple category filter (front-end only; can expand later)
+    const chips = document.querySelectorAll(".filter-chip");
+    const cards = document.querySelectorAll(".resource-card");
+
+    chips.forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const category = chip.getAttribute("data-filter");
+        chips.forEach((c) => c.classList.remove("active"));
+        chip.classList.add("active");
+
+        cards.forEach((card) => {
+          const cardCat = card.getAttribute("data-category");
+          if (category === "all" || cardCat === category) {
+            card.style.display = "";
+          } else {
+            card.style.display = "none";
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
